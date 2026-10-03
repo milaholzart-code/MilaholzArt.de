@@ -417,6 +417,44 @@
   }
   .card:hover::before{ transform:scaleY(1); }
 
+  /* Leistungen: interaktive Liste mit Bildvorschau */
+  .ilp{ list-style:none; margin:0; padding:0; position:relative; background:var(--panel); border:1px solid var(--border); border-radius:14px; overflow:hidden; }
+  .ilp-bar{ position:absolute; left:0; right:0; top:0; height:0; background:var(--wood); opacity:0; pointer-events:none;
+    transition:transform .35s cubic-bezier(.22,1,.36,1), height .35s cubic-bezier(.22,1,.36,1), opacity .25s ease; }
+  .ilp-row{ position:relative; z-index:1; display:grid; grid-template-columns:56px 1fr auto; align-items:center; gap:20px;
+    padding:24px 28px; border-top:1px solid var(--border); cursor:default; outline:none; transition:color .35s ease; }
+  .ilp-row:first-of-type{ border-top:0; }
+  .ilp-num{ font-family:"Space Mono",monospace; font-size:.8rem; color:var(--accent); letter-spacing:.06em; transition:color .35s ease; }
+  .ilp-main h3{ font-size:1.25rem; transition:color .35s ease, transform .35s ease; }
+  .ilp-main p{ color:var(--ink-soft); font-size:.92rem; line-height:1.55; margin-top:6px; max-width:58ch; transition:color .35s ease; }
+  .ilp-tag{ font-family:"Space Mono",monospace; font-size:.72rem; letter-spacing:.08em; text-transform:uppercase; color:var(--ink-soft);
+    border:1px solid var(--border); border-radius:999px; padding:6px 12px; white-space:nowrap; transition:color .35s ease, border-color .35s ease; }
+  .ilp-main{ min-width:0; }
+  .ilp-main h3, .ilp-main p{ overflow-wrap:break-word; hyphens:auto; }
+  .ilp-thumb{ display:none; }
+  .ilp-row.is-active, .ilp-row.is-active .ilp-main p, .ilp-row.is-active .ilp-tag{ color:var(--bg); }
+  .ilp-row.is-active .ilp-num{ color:var(--accent-soft); }
+  .ilp-row.is-active .ilp-main h3{ transform:translateX(6px); color:var(--bg); }
+  .ilp-row.is-active .ilp-tag{ border-color:color-mix(in srgb, var(--bg) 45%, transparent); }
+  .ilp-row:focus-visible{ box-shadow:inset 0 0 0 2px var(--accent); }
+  .ilp-preview{ position:fixed; left:0; top:0; width:250px; height:310px; z-index:60; pointer-events:none; border-radius:12px; overflow:hidden;
+    box-shadow:0 30px 60px -20px rgba(18,11,4,.6); clip-path:inset(50% 0 50% 0 round 12px); opacity:0;
+    transition:clip-path .6s cubic-bezier(.22,1,.36,1), opacity .3s ease; will-change:transform; }
+  .ilp-preview.show{ clip-path:inset(0 0 0 0 round 12px); opacity:1; }
+  .ilp-preview img{ width:100%; height:100%; object-fit:cover; display:block; transform:scale(1.15); transition:transform .6s cubic-bezier(.22,1,.36,1); }
+  .ilp-preview.show img{ transform:scale(1); }
+  /* Touch-Geräte & schmale Screens: Vorschaubild direkt in der Zeile */
+  @media (hover:none), (pointer:coarse), (max-width:760px){
+    .ilp-preview, .ilp-bar{ display:none; }
+    .ilp-row{ grid-template-columns:minmax(0,1fr) 84px; gap:6px 16px; padding:18px; }
+    .ilp-num{ grid-column:1; grid-row:1; }
+    .ilp-main{ grid-column:1; grid-row:2; }
+    .ilp-tag{ grid-column:1; grid-row:3; justify-self:start; }
+    .ilp-thumb{ display:block; grid-column:2; grid-row:1 / span 3; width:84px; height:104px; object-fit:cover; border-radius:10px; }
+    .ilp-main h3{ font-size:1.08rem; }
+  }
+  @media (prefers-reduced-motion: reduce){ .ilp-bar, .ilp-preview, .ilp-preview img, .ilp-row, .ilp-main h3{ transition:none; } }
+
   /* Prozess */
   .process{
     display:grid;
@@ -839,14 +877,46 @@
       <h2>Kernangebot laut Geschäftsidee: Massivholz &amp; Epoxidharz</h2>
       <p>Das im Businessplan definierte Leistungsangebot: personalisierte Massivholzprodukte als Kernangebot, ergänzt durch Epoxidharz-Kunsthandwerk – positioniert über Individualisierung, hochwertige Materialien und digitale Präzisionsfertigung für Privat- und Geschäftskunden.</p>
     </div>
-    <div class="grid">
-      <div class="card reveal"><span class="num">01</span><h3>Personalisierte Holzschilder</h3><p>Namens-, Tür- und Hochzeitsschilder mit individueller Gravur nach Wunschmotiv.</p></div>
-      <div class="card reveal"><span class="num">02</span><h3>Wanduhren &amp; Wohnaccessoires</h3><p>Massivholz-Objekte für Wohnraum und Dekoration, gefräst und handveredelt.</p></div>
-      <div class="card reveal"><span class="num">03</span><h3>Untersetzer &amp; Geschenke</h3><p>Kleinserien in hoher Stückzahl – ideal für Anlässe, Feiern und Firmenpräsente.</p></div>
-      <div class="card reveal"><span class="num">04</span><h3>Firmenschilder &amp; Logos</h3><p>Gravierte Unternehmenskennzeichnung und Kleinserien für Betriebe, Vereine und Gastronomie.</p></div>
-      <div class="card reveal"><span class="num">05</span><h3>Holz-Epoxidharz-Kunst</h3><p>Kombination aus Massivholz und Epoxidharz für außergewöhnliche Unikate.</p></div>
-      <div class="card reveal"><span class="num">06</span><h3>Sonderanfertigungen</h3><p>Individuelle Formen und Schriftzüge nach Kundenzeichnung oder Konzept.</p></div>
-    </div>
+    <ul class="ilp reveal" id="leistungen-list" aria-label="Leistungen mit Produktbeispielen">
+      <span class="ilp-bar" aria-hidden="true"></span>
+      <li class="ilp-row" data-img="images/name2.jpg" data-alt="Personalisiertes Holz-Namensschild „Nia“" tabindex="0">
+        <span class="ilp-num">01</span>
+        <div class="ilp-main"><h3>Personalisierte Holzschilder</h3><p>Namens-, Tür- und Hochzeitsschilder mit individueller Gravur nach Wunschmotiv.</p></div>
+        <span class="ilp-tag">Laser · CNC</span>
+        <img class="ilp-thumb" src="images/name2.jpg" alt="" loading="lazy" decoding="async">
+      </li>
+      <li class="ilp-row" data-img="images/clock2.jpg" data-alt="Geometrische Wanduhr aus Holz" tabindex="0">
+        <span class="ilp-num">02</span>
+        <div class="ilp-main"><h3>Wanduhren &amp; Wohnaccessoires</h3><p>Massivholz-Objekte für Wohnraum und Dekoration, gefräst und handveredelt.</p></div>
+        <span class="ilp-tag">CNC</span>
+        <img class="ilp-thumb" src="images/clock2.jpg" alt="" loading="lazy" decoding="async">
+      </li>
+      <li class="ilp-row" data-img="images/coaster1.jpg" data-alt="Gravierte Holzuntersetzer mit Kaffeemotiv" tabindex="0">
+        <span class="ilp-num">03</span>
+        <div class="ilp-main"><h3>Untersetzer &amp; Geschenke</h3><p>Kleinserien in hoher Stückzahl – ideal für Anlässe, Feiern und Firmenpräsente.</p></div>
+        <span class="ilp-tag">Laser</span>
+        <img class="ilp-thumb" src="images/coaster1.jpg" alt="" loading="lazy" decoding="async">
+      </li>
+      <li class="ilp-row" data-img="images/plaque1.jpg" data-alt="Graviertes rundes Firmenschild aus Holz" tabindex="0">
+        <span class="ilp-num">04</span>
+        <div class="ilp-main"><h3>Firmenschilder &amp; Logos</h3><p>Gravierte Unternehmenskennzeichnung und Kleinserien für Betriebe, Vereine und Gastronomie.</p></div>
+        <span class="ilp-tag">Laser · CNC</span>
+        <img class="ilp-thumb" src="images/plaque1.jpg" alt="" loading="lazy" decoding="async">
+      </li>
+      <li class="ilp-row" data-img="images/coaster2.jpg" data-alt="Holzuntersetzer mit blauem Epoxidharz-Einguss" tabindex="0">
+        <span class="ilp-num">05</span>
+        <div class="ilp-main"><h3>Holz-Epoxidharz-Kunst</h3><p>Kombination aus Massivholz und Epoxidharz für außergewöhnliche Unikate.</p></div>
+        <span class="ilp-tag">Epoxid</span>
+        <img class="ilp-thumb" src="images/coaster2.jpg" alt="" loading="lazy" decoding="async">
+      </li>
+      <li class="ilp-row" data-img="images/plaque2.jpg" data-alt="3D-Holzrelief als Wandkunst" tabindex="0">
+        <span class="ilp-num">06</span>
+        <div class="ilp-main"><h3>Sonderanfertigungen</h3><p>Individuelle Formen und Schriftzüge nach Kundenzeichnung oder Konzept.</p></div>
+        <span class="ilp-tag">CNC</span>
+        <img class="ilp-thumb" src="images/plaque2.jpg" alt="" loading="lazy" decoding="async">
+      </li>
+    </ul>
+    <div class="ilp-preview" aria-hidden="true"><img alt=""></div>
   </div>
 </section>
 
@@ -1494,6 +1564,51 @@
     window.addEventListener('scroll', onScroll, { passive:true });
     window.addEventListener('resize', function(){ sizeCanvas(); pendingFrame = frameForScroll(); renderPending(); });
     onScroll();
+  })();
+</script>
+<script>
+  // Leistungen: interaktive Liste mit Bildvorschau (ohne externe Bibliothek, CSP-konform)
+  (function(){
+    var list=document.getElementById('leistungen-list');
+    if(!list) return;
+    var rows=[].slice.call(list.querySelectorAll('.ilp-row'));
+    var bar=list.querySelector('.ilp-bar');
+    var preview=document.querySelector('.ilp-preview');
+    var img=preview && preview.querySelector('img');
+    var fine=window.matchMedia('(hover:hover) and (pointer:fine) and (min-width:761px)');
+    var reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var LERP=0.18, tx=0, ty=0, x=0, y=0, raf=null, active=null;
+    rows.forEach(function(r){ var i=new Image(); i.src=r.dataset.img; });
+    function setActive(row){
+      if(active===row) return;
+      if(active) active.classList.remove('is-active');
+      active=row;
+      if(!row){ bar.style.opacity='0'; preview.classList.remove('show'); return; }
+      row.classList.add('is-active');
+      bar.style.opacity='1';
+      bar.style.height=row.offsetHeight+'px';
+      bar.style.transform='translateY('+row.offsetTop+'px)';
+      if(img.getAttribute('src')!==row.dataset.img){ img.src=row.dataset.img; img.alt=row.dataset.alt||''; }
+      if(fine.matches) preview.classList.add('show');
+    }
+    function loop(){
+      x+=(tx-x)*(reduce?1:LERP); y+=(ty-y)*(reduce?1:LERP);
+      preview.style.transform='translate3d('+(x+24)+'px,'+(y-155)+'px,0)';
+      raf=(Math.abs(tx-x)>.3||Math.abs(ty-y)>.3)?requestAnimationFrame(loop):null;
+    }
+    list.addEventListener('pointermove',function(e){
+      if(!fine.matches) return;
+      tx=Math.min(e.clientX, window.innerWidth-290); ty=e.clientY;
+      if(!active){ x=tx; y=ty; }
+      var row=e.target.closest('.ilp-row'); if(row) setActive(row);
+      if(!raf) raf=requestAnimationFrame(loop);
+    });
+    list.addEventListener('pointerleave',function(){ setActive(null); });
+    rows.forEach(function(r){
+      r.addEventListener('focus',function(){ if(fine.matches){ var b=r.getBoundingClientRect(); tx=x=b.right-300; ty=y=b.top+b.height/2; loop(); } setActive(r); });
+      r.addEventListener('blur',function(){ setActive(null); });
+    });
+    window.addEventListener('scroll',function(){ if(active && fine.matches) setActive(null); },{passive:true});
   })();
 </script>
 </body>
