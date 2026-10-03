@@ -1351,7 +1351,7 @@
     // wird die für Desktop geschnittene Breitbild-Sequenz verwendet, darunter die
     // Hochkant-Sequenz fürs Handy.
     var isDesktop = window.matchMedia && window.matchMedia('(min-width: 761px)').matches;
-    var FRAME_COUNT = 400;
+    var FRAME_COUNT = 496;
     var FRAME_DIR = isDesktop ? 'assets/video-frames-desktop' : 'assets/video-frames';
     var FRAME_PATH = function(i){
       return FRAME_DIR + '/frame-' + String(i).padStart(3,'0') + '.jpg';
