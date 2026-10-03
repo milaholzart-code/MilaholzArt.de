@@ -1380,13 +1380,21 @@
 
     function drawFrame(index){
       var img = frames[index];
-      if(!img || !ready[index]) return false;
+      // naturalWidth/Height > 0 guards against a frame that was wrongly marked
+      // "ready" after a failed/aborted network load (broken image, no pixels) -
+      // without this, a fetch error on a slow connection draws a blank/garbled
+      // patch instead of falling back to a neighboring, actually-loaded frame.
+      if(!img || !ready[index] || !img.naturalWidth || !img.naturalHeight) return false;
       var vw = window.innerWidth, vh = window.innerHeight;
       var scale = Math.max(vw / img.naturalWidth, vh / img.naturalHeight);
       var dw = img.naturalWidth * scale, dh = img.naturalHeight * scale;
       var dx = (vw - dw) / 2, dy = (vh - dh) / 2;
-      ctx.clearRect(0, 0, vw, vh);
-      ctx.drawImage(img, dx, dy, dw, dh);
+      try{
+        ctx.clearRect(0, 0, vw, vh);
+        ctx.drawImage(img, dx, dy, dw, dh);
+      }catch(e){
+        return false; // corrupted/partial image data - let the caller try a neighbor
+      }
       currentFrame = index;
       return true;
     }
@@ -1427,11 +1435,12 @@
 
     function preload(){
       var firstReady = false;
+      var MAX_RETRIES = 4;
       for(var i = 0; i < FRAME_COUNT; i++){
         (function(i){
           var img = new Image();
           img.decoding = 'async';
-          img.src = FRAME_PATH(i + 1);
+          var retries = 0;
           var markReady = function(){
             ready[i] = true;
             if(!firstReady){
@@ -1451,7 +1460,18 @@
             if(img.decode){ img.decode().then(markReady).catch(markReady); }
             else{ markReady(); }
           };
-          img.onerror = markReady;
+          // Bei einem Ladefehler (z. B. abgebrochene Anfrage auf einer langsamen
+          // Mobilverbindung) NICHT als "ready" markieren - sonst versucht drawFrame()
+          // ein Bild ohne Pixel zu zeichnen und es erscheint ein leerer/unscharfer
+          // Fleck statt des echten Frames. Stattdessen mit kurzer Pause erneut laden;
+          // bis dahin zeigt renderPending() einfach den nächstgelegenen fertigen Frame.
+          img.onerror = function(){
+            if(retries < MAX_RETRIES){
+              retries++;
+              setTimeout(function(){ img.src = FRAME_PATH(i + 1); }, 600 * retries);
+            }
+          };
+          img.src = FRAME_PATH(i + 1);
           frames.push(img);
         })(i);
       }
