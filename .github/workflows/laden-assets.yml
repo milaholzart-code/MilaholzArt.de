@@ -1,0 +1,28 @@
+name: Laden-Bilder holen
+on:
+  push:
+    branches: [laden-assets]
+    paths: [laden/urls.txt]
+permissions:
+  contents: write
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bilder herunterladen
+        run: |
+          mkdir -p laden/raw
+          while read -r name url; do
+            [ -z "$name" ] && continue
+            [ -f "laden/raw/$name.png" ] && continue
+            curl -sSL --fail -o "laden/raw/$name.png" "$url" || echo "FEHLER $name"
+          done < laden/urls.txt
+          ls -la laden/raw
+      - name: Commit
+        run: |
+          git config user.name "milaholz-bot"
+          git config user.email "milaholzart@gmail.com"
+          git add laden/raw
+          git diff --cached --quiet || git commit -m "Laden-Bilder aktualisiert"
+          git push
