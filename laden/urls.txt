@@ -1,1 +1,6 @@
 aussen https://www.figma.com/api/mcp/asset/2b6d7854-7e67-4a3a-af82-eded7e452d32.png
+innen https://www.figma.com/api/mcp/asset/49506e66-08fc-4219-a577-0219698484b8.png
+wand https://www.figma.com/api/mcp/asset/aad08580-5698-4e82-891e-1c0e00a91a1c.png
+tisch https://www.figma.com/api/mcp/asset/5cadab24-e02f-45e0-9372-4e840af16ca9.png
+werkstatt https://www.figma.com/api/mcp/asset/59a58dc4-4da8-4be9-a69d-0ee5643d9174.png
+buero https://www.figma.com/api/mcp/asset/8c695568-6ed4-482c-a23c-96790266957e.png
