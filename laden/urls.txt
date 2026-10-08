@@ -4,3 +4,6 @@ wand https://www.figma.com/api/mcp/asset/aad08580-5698-4e82-891e-1c0e00a91a1c.pn
 tisch https://www.figma.com/api/mcp/asset/5cadab24-e02f-45e0-9372-4e840af16ca9.png
 werkstatt https://www.figma.com/api/mcp/asset/59a58dc4-4da8-4be9-a69d-0ee5643d9174.png
 buero https://www.figma.com/api/mcp/asset/8c695568-6ed4-482c-a23c-96790266957e.png
+tisch2 https://www.figma.com/api/mcp/asset/350e0e93-bfdd-4b87-a0c8-c84ae781f7da.png
+werkstatt2 https://www.figma.com/api/mcp/asset/f292a1ac-7844-4f5d-9705-afa3daa9399e.png
+wand2 https://www.figma.com/api/mcp/asset/74c9fd6a-30d1-4c69-9603-1673c1819cfe.png
